@@ -1,7 +1,22 @@
 local menu = require("menu")
 local gameState = "menu"
+
+local Dialove = require('libraries/dialove/Dialove')
+
 function love.load()
-   
+    
+    dialogManager = Dialove.init({
+        font = love.graphics.newFont('fonts/earthbound_beginnings/earth.ttf', 16)
+      })
+
+    -- use this approach instead:
+  
+    dialogManager:show({text ='What Am I doing back here in Wilbrod...', title = 'Inner Thoughts'})
+    dialogManager:push({text ='Wheres Nic? Been a while...', title = 'Carlos'})
+    dialogManager:push('Better check the shed.  Theres always somone in there.')  
+
+
+
 
     sounds = {}
 
@@ -32,10 +47,10 @@ function love.load()
 
 
     player = {}
-    player.collider = world:newBSGRectangleCollider(400,250,50,100,10)
+    player.collider = world:newBSGRectangleCollider(200,50,50,100,10)
     player.collider:setFixedRotation(true)
-    player.x = 400
-    player.y = 200
+    player.x = 100
+    player.y = 100
     player.speed = 300
     player.sprite = love.graphics.newImage('sprites/capy.png')
     player.spriteSheet = love.graphics.newImage('sprites/player-sheet.png')
@@ -77,6 +92,8 @@ function love.update(dt)
 
 
     elseif gameState == "playing" then 
+
+        dialogManager:update(dt)
 
         local isMoving = false
 
@@ -162,6 +179,8 @@ function love.draw()
         gameMap:drawLayer(gameMap.layers["superTrees"])
         player.anim:draw(player.spriteSheet, player.x, player.y, nil, 6, nil, 6, 9)
         cam:detach()
+
+        dialogManager:draw()
     end
 end
 
@@ -179,5 +198,23 @@ function love.keypressed(key)
         elseif key == "z" then
             sounds.music:stop()
         end
+    end
+
+    if key == 'return' then
+        dialogManager:pop()
+      elseif k == 'c' then
+        dialogManager:complete()
+      elseif k == 'f' then
+        dialogManager:faster()
+      elseif k == 'down' then
+        dialogManager:changeOption(1) -- next one
+      elseif k == 'up' then
+        dialogManager:changeOption(-1) -- previous one
+      end
+end
+
+function love.keyreleased(k)
+    if k == 'space' then
+      dialogManager:slower()
     end
 end
