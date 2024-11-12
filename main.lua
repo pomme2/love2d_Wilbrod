@@ -13,7 +13,7 @@ function love.load()
   
     dialogManager:show({text ='What Am I doing back here in Wilbrod...', title = 'Inner Thoughts'})
     dialogManager:push({text ='Wheres Nic? Been a while...', title = 'Carlos'})
-    dialogManager:push('Better check the shed.  Theres always somone in there.')  
+    dialogManager:push('Better check the shed.  Theres always someone in there.')  
 
 
 
@@ -47,10 +47,10 @@ function love.load()
 
 
     player = {}
-    player.collider = world:newBSGRectangleCollider(200,50,50,100,10)
+    player.collider = world:newBSGRectangleCollider(400,250,40,80,10)
     player.collider:setFixedRotation(true)
-    player.x = 100
-    player.y = 100
+    player.x = 400
+    player.y = 200
     player.speed = 300
     player.sprite = love.graphics.newImage('sprites/capy.png')
     player.spriteSheet = love.graphics.newImage('sprites/player-sheet.png')
@@ -178,6 +178,7 @@ function love.draw()
         gameMap:drawLayer(gameMap.layers["Trees"])
         gameMap:drawLayer(gameMap.layers["superTrees"])
         player.anim:draw(player.spriteSheet, player.x, player.y, nil, 6, nil, 6, 9)
+        world:draw()
         cam:detach()
 
         dialogManager:draw()
