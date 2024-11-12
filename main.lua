@@ -1,6 +1,12 @@
 local menu = require("menu")
 local gameState = "menu"
 
+local NPC = require("npc")
+local playerSprite = love.graphics.newImage('sprites/capy.png')
+
+
+local npc
+
 local Dialove = require('libraries/dialove/Dialove')
 
 function love.load()
@@ -67,6 +73,8 @@ function love.load()
 
 
     background = love.graphics.newImage('sprites/bg.jpg')
+
+    npc = NPC.new(100,1700,playerSprite)
 
     walls = {}
     if gameMap.layers["Walls"] then
@@ -166,12 +174,18 @@ function love.update(dt)
         if cam.y > (mapH - h/2) then
             cam.y = (mapH - h/2)
         end
+
+
+        npc:update(player.x, player.y)
     end    
 end
 
 function love.draw()
     if gameState == "menu" then
         menu.draw()  -- Draw the menu screen
+
+
+
     elseif gameState == "playing" then
         cam:attach()
         gameMap:drawLayer(gameMap.layers["Ground"])
@@ -179,40 +193,52 @@ function love.draw()
         gameMap:drawLayer(gameMap.layers["superTrees"])
         player.anim:draw(player.spriteSheet, player.x, player.y, nil, 6, nil, 6, 9)
         world:draw()
+        npc:draw()
         cam:detach()
 
         dialogManager:draw()
+        
+
+
+
     end
 end
 
 
 function love.keypressed(key)
     if gameState == "menu" then
+        -- Handle menu selection
         local action = menu.updateSelection(key)
         if action == "start" then
-            gameState = "playing"  -- Switch to the game state
-            sounds.music:play()    -- Start background music
+            gameState = "playing"
+            sounds.music:play()
         end
+
     elseif gameState == "playing" then
+        -- Handle game sound effects
         if key == "space" then
             sounds.blip:play()
         elseif key == "z" then
             sounds.music:stop()
         end
-    end
 
-    if key == 'return' then
-        dialogManager:pop()
-      elseif k == 'c' then
-        dialogManager:complete()
-      elseif k == 'f' then
-        dialogManager:faster()
-      elseif k == 'down' then
-        dialogManager:changeOption(1) -- next one
-      elseif k == 'up' then
-        dialogManager:changeOption(-1) -- previous one
-      end
+        -- Handle dialogue manager controls
+        if key == 'return' then
+            dialogManager:pop()
+        elseif key == 'c' then
+            dialogManager:complete()
+        elseif key == 'f' then
+            dialogManager:faster()
+        end
+
+        -- Handle NPC interaction if player is near
+        if key == "e" and npc.isNearPlayer then
+            -- Uncomment and customize this line for specific NPC interactions
+            -- dialogManager:show({text = "Yooo Carlos, any chance you got a light? Would let you in but we need one hehe", title = "Mascouche"})
+        end
+    end
 end
+    
 
 function love.keyreleased(k)
     if k == 'space' then
