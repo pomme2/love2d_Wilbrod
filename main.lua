@@ -1,4 +1,15 @@
+local menu = require("menu")
+local gameState = "menu"
 function love.load()
+   
+
+    sounds = {}
+
+    sounds.blip = love.audio.newSource("sounds/blip.wav" , "static")
+    sounds.music = love.audio.newSource("sounds/music.mp3", "stream")
+    sounds.music:setLooping(true)
+
+
     wf = require "libraries/windfield/windfield"
 
     world = wf.newWorld(0,0)
@@ -53,95 +64,120 @@ function love.load()
     
     end
 
+
+    sounds.music:play()
     
 end
 
 
 
 function love.update(dt)
-    local isMoving = false
 
-    local vx = 0
-    local vy = 0
-    
-    
+    if gameState == "menu" then
 
-    if love.keyboard.isDown("right") then
-        vx = player.speed
-        player.anim = player.animations.right
-        isMoving = true
-    end
-    if love.keyboard.isDown("left") then
-        vx = player.speed * -1
-        player.anim = player.animations.left
-        isMoving = true
 
-    end
-    if love.keyboard.isDown("down") then
-        vy = player.speed
-        player.anim = player.animations.down
-        isMoving = true
+    elseif gameState == "playing" then 
 
-    end
-    if love.keyboard.isDown("up") then
-        vy = player.speed * -1
-        player.anim = player.animations.up
-        isMoving = true
-       -- test:applyLinearImpulse(0, -140)
+        local isMoving = false
 
-    end
-
-    player.collider:setLinearVelocity(vx,vy)
-    
-    if isMoving == false then
-        player.anim:gotoFrame(2)
+        local vx = 0
+        local vy = 0
         
-    end
+        
 
-    world:update(dt)
-    player.x = player.collider:getX()
-    player.y = player.collider:getY()
+        if love.keyboard.isDown("right") then
+            vx = player.speed
+            player.anim = player.animations.right
+            isMoving = true
+        end
+        if love.keyboard.isDown("left") then
+            vx = player.speed * -1
+            player.anim = player.animations.left
+            isMoving = true
+
+        end
+        if love.keyboard.isDown("down") then
+            vy = player.speed
+            player.anim = player.animations.down
+            isMoving = true
+
+        end
+        if love.keyboard.isDown("up") then
+            vy = player.speed * -1
+            player.anim = player.animations.up
+            isMoving = true
+        -- test:applyLinearImpulse(0, -140)
+
+        end
+
+        player.collider:setLinearVelocity(vx,vy)
+        
+        if isMoving == false then
+            player.anim:gotoFrame(2)
+            
+        end
+
+        world:update(dt)
+        player.x = player.collider:getX()
+        player.y = player.collider:getY()
 
 
-    player.anim:update(dt)
+        player.anim:update(dt)
 
-    cam:lookAt(player.x, player.y)
+        cam:lookAt(player.x, player.y)
 
-    local w = love.graphics.getWidth()
-    local h = love.graphics.getHeight()
+        local w = love.graphics.getWidth()
+        local h = love.graphics.getHeight()
 
-    if cam.x < w/2 then 
-        cam.x = w/2
-    end
-    if cam.y < h/2 then 
-        cam.y = h/2
-    end
+        if cam.x < w/2 then 
+            cam.x = w/2
+        end
+        if cam.y < h/2 then 
+            cam.y = h/2
+        end
 
 
-    local mapW = gameMap.width * gameMap.tilewidth
-    local mapH = gameMap.height * gameMap.tileheight
+        local mapW = gameMap.width * gameMap.tilewidth
+        local mapH = gameMap.height * gameMap.tileheight
 
-    --right border
-    if cam.x > (mapW - w/2) then   
-        cam.x = (mapW - w/2)
-    end
+        --right border
+        if cam.x > (mapW - w/2) then   
+            cam.x = (mapW - w/2)
+        end
 
-    --bottom border
-    if cam.y > (mapH - h/2) then
-        cam.y = (mapH - h/2)
-    end
+        --bottom border
+        if cam.y > (mapH - h/2) then
+            cam.y = (mapH - h/2)
+        end
+    end    
 end
 
 function love.draw()
-   
-    cam:attach() 
+    if gameState == "menu" then
+        menu.draw()  -- Draw the menu screen
+    elseif gameState == "playing" then
+        cam:attach()
         gameMap:drawLayer(gameMap.layers["Ground"])
         gameMap:drawLayer(gameMap.layers["Trees"])
         gameMap:drawLayer(gameMap.layers["superTrees"])
-        player.anim:draw(player.spriteSheet, player.x , player.y , nil,6,nil,6,9)
-        --remove world to remove hitbox
-        --world:draw()
-    cam:detach()
+        player.anim:draw(player.spriteSheet, player.x, player.y, nil, 6, nil, 6, 9)
+        cam:detach()
+    end
+end
 
-  
+
+function love.keypressed(key)
+    if gameState == "menu" then
+        local action = menu.updateSelection(key)
+        if action == "start" then
+            gameState = "playing"  -- Switch to the game state
+            sounds.music:play()    -- Start background music
+        end
+    elseif gameState == "playing" then
+        if key == "space" then
+            sounds.blip:play()
+        elseif key == "z" then
+            sounds.music:stop()
+        end
+    end
 end
